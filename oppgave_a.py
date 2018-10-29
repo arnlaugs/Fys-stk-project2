@@ -2,14 +2,16 @@ import numpy as np
 from regression import OLS, Ridge,Lasso
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error, r2_score
-
+from sklearn.model_selection import cross_validate
 np.random.seed(12)
+from sklearn import linear_model
+from functions import *
 
 
 
 # System size
 L = 40             # Number of spins
-N = 10000          # Number of states
+N = 1000          # Number of states
 
 
 # Create 10000 random Ising states with spin +1 or -1
@@ -61,7 +63,8 @@ X_train = data[0][:n_samples]
 y_train = data[1][:n_samples]
 X_test = data[0][n_samples:3*n_samples//2]
 y_test = data[1][n_samples:3*n_samples//2]
-
+x=data[0]
+y=data[1]
 
 # Create list for storing MSE-values and R2-values
 MSE_train_OLS = []
@@ -79,33 +82,40 @@ MSE_test_L = []
 R2_train_L = []
 R2_test_L = []
 
-lmbdas = np.logspace(-4, 5, 10)
+lmbdas = np.logspace(-2, 5, 5)
 cmap_args=dict(vmin=-1., vmax=1., cmap='seismic')
 
+model_OLS = OLS()
+J_OLS = (model_OLS.fit(x, y, ret=True)).reshape((L,L))
+ypred = model_OLS.predict(x)
+MSE_train_OLS.append(mean_squared_error(y, model_OLS.predict(x)))
+R2_train_OLS.append(r2_score(y, model_OLS.predict(x)))
+K_foldvalues=K_fold(data[0],data[1],5,1, model_OLS)
+MSE_test_OLS.append(K_foldvalues[0])
+R2_test_OLS.append(K_foldvalues[1])
 for lmbda in lmbdas:
-    model_OLS = OLS()
-    J_OLS = (model_OLS.fit(X_train, y_train, ret=True)).reshape((L,L))
-    ypred = model_OLS.predict(X_test)
-    MSE_train_OLS.append(mean_squared_error(y_train, model_OLS.predict(X_train)))
-    MSE_test_OLS.append(mean_squared_error(y_test, model_OLS.predict(X_test)))
-    R2_train_OLS.append(r2_score(y_train, model_OLS.predict(X_train)))
-    R2_test_OLS.append(r2_score(y_test, model_OLS.predict(X_test)))
+    print(lmbda)
+
+    #R2_test_OLS.append(r2_score(y_test, model_OLS.predict(X_test)))
 
     model_R = Ridge(lmbda=lmbda)
-    J_R = (model_R.fit(X_train, y_train, ret=True)).reshape((L,L))
-    MSE_train_R.append(mean_squared_error(y_train, model_R.predict(X_train)))
-    MSE_test_R.append(mean_squared_error(y_test, model_R.predict(X_test)))
-    R2_train_R.append(r2_score(y_train, model_R.predict(X_train)))
-    R2_test_R.append(r2_score(y_test, model_R.predict(X_test)))
+    J_R = (model_R.fit(x, y, ret=True)).reshape((L,L))
+    MSE_train_R.append(mean_squared_error(y, model_R.predict(x)))
+    R2_train_R.append(r2_score(y, model_R.predict(x)))
+    K_foldvalues=K_fold(data[0],data[1],5,lmbda, model_R)
+    MSE_test_R.append(K_foldvalues[0])
+    R2_test_R.append(K_foldvalues[1])
+
+
 
     model_L = Lasso(alpha=lmbda)
-    J_L = (model_L.fit(X_train, y_train, ret=True)).reshape((L,L))
-    MSE_train_L.append(mean_squared_error(y_train, model_L.predict(X_train)))
-    MSE_test_L.append(mean_squared_error(y_test, model_L.predict(X_test)))
-    R2_train_L.append(r2_score(y_train, model_L.predict(X_train)))
-    R2_test_L.append(r2_score(y_test, model_L.predict(X_test)))
+    J_L = (model_L.fit(x, y, ret=True)).reshape((L,L))
 
-
+    MSE_train_L.append(mean_squared_error(y, model_L.predict(x)))
+    R2_train_L.append(r2_score(y, model_L.predict(x)))
+    K_foldvalues=K_fold(data[0],data[1],5,lmbda, model_L)
+    MSE_test_L.append(K_foldvalues[0])
+    R2_test_L.append(K_foldvalues[1])
 
     fig = plt.figure()
     plt.subplot(1,3,1)
@@ -122,7 +132,7 @@ for lmbda in lmbdas:
     plt.title(r'Lasso $\alpha =$%g' %lmbda)
 
     # # Making colorbar
-    # fig.subplots_adjust(right=0.8)
+    # fig.subplots_adjust(right=0.8)K_fold(data[0],data[1],5,lmbda, model_OLS)
     # cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
     # fig.colorbar(im, cax=cbar_ax)
 plt.show()
@@ -135,24 +145,26 @@ def plot_error_estimates():
     """
     # Plotting the R2-scores
     plt.figure()
-    plt.semilogx(lmbdas, R2_train_OLS, 'b', label='OLS (train)')
-    plt.semilogx(lmbdas, R2_test_OLS, 'b--', label='OLS (test)')
+    plt.semilogx([lmbdas[0],lmbdas[-1]], [R2_train_OLS,R2_train_OLS], 'b', label='OLS (train)')
+    plt.semilogx([lmbdas[0],lmbdas[-1]], [R2_test_OLS,R2_test_OLS], 'b--', label='OLS (test)')
     plt.semilogx(lmbdas, R2_train_R, 'r', label='Ridge (train)')
     plt.semilogx(lmbdas, R2_test_R, 'r--', label='Ridge (test)')
     plt.semilogx(lmbdas, R2_train_L, 'g', label='Lasso (train)')
     plt.semilogx(lmbdas, R2_test_L, 'g--', label='Lasso (test)')
-    plt.tile('R2-score')
+    #plt.semilogx(1, test_k_R2, 'x', label='K_fold (test)')
+    plt.title('R2-score')
     plt.legend()
     plt.grid()
 
     # Plotting the MSE-scores
     plt.figure()
-    plt.semilogx(lmbdas, MSE_train_OLS, 'b', label='OLS (train)')
-    plt.semilogx(lmbdas, MSE_test_OLS, 'b--', label='OLS (test)')
+    plt.semilogx([lmbdas[0],lmbdas[-1]], [MSE_train_OLS,MSE_train_OLS], 'b', label='OLS (train)')
+    plt.semilogx([lmbdas[0],lmbdas[-1]], [MSE_test_OLS,MSE_test_OLS], 'b--', label='OLS (test)')
     plt.semilogx(lmbdas, MSE_train_R, 'r', label='Ridge (train)')
     plt.semilogx(lmbdas, MSE_test_R, 'r--', label='Ridge (test)')
     plt.semilogx(lmbdas, MSE_train_L, 'g', label='Lasso (train)')
     plt.semilogx(lmbdas, MSE_test_L, 'g--', label='Lasso (test)')
+    #plt.semilogx(1, test_k_MSE, 'x', label='K_fold (test)')
     plt.title('Mean squared error')
     plt.legend()
     plt.grid()
