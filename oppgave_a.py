@@ -141,7 +141,7 @@ def plot_error_estimates():
     plt.semilogx(lmbdas, R2_test_R, 'r--', label='Ridge (test)')
     plt.semilogx(lmbdas, R2_train_L, 'g', label='Lasso (train)')
     plt.semilogx(lmbdas, R2_test_L, 'g--', label='Lasso (test)')
-    plt.tile('R2-score')
+    plt.title('R2-score')
     plt.legend()
     plt.grid()
 
