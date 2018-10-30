@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 np.random.seed(14)
-
-
+import seaborn as sns
+import pandas as pd
 
 
 
@@ -33,10 +33,10 @@ def weigths_update(x,y,w,lr,itterations):
         p=predictions-y
         #print(predictions.shape, y.shape, x.shape,p.shape)
         w=w-1/N*lr*np.dot(x.T,p)
-        if k%50==0:
+        #if k%50==0:
             #cost=loss(sigmoid(x,w),y)
             #print( cost,accurasy(x,w,y),k, lr)
-            print(k)
+        #    print(k)
 
     return w
 
@@ -93,19 +93,33 @@ x_train,y_train,x_test,y_test=train_test_split(x,y,train_size=0.8)
 print(x_train.shape, x_test.shape)
 
 
-learning_rates=[1e-4,1e-3,1-2,1e-1,1,2]
+learning_rates=[1e-4,1e-3,1-2,1e-1,1]
 #learning_rates=[0.01]
-itterations=[10,2e2,5e2,1e3,5e2]
+itterations=[10,1e2,5e2,1e3]
+test_accuracy= np.zeros((len(itterations),len(learning_rates)))
+train_accuracy=  np.zeros((len(itterations),len(learning_rates)))
+i=0
+for j in range(len(itterations)-1):
+    for lr in learning_rates:
 
+        w=np.random.randn(x_train.shape[1],1)
+        w=weigths_update(x_train,y_train,w,lr,itterations[j])
+        print(lr)
+        #cost=loss(sigmoid(x,w),y)
+        #print( cost)
+        test_accuracy[j][i]=accurasy(x_test,w,y_test)
+        train_accuracy[j][i]=accurasy(x_train,w,y_train)
 
-for lr in learning_rates:
+        i+=1
 
-    w=np.random.randn(x_train.shape[1],1)
-    w=weigths_update(x_train,y_train,w,lr,itterations[1])
-    print(lr)
-    #cost=loss(sigmoid(x,w),y)
-    #print( cost)
-    print(accurasy(x_test,w,y_test))
-    print(accurasy(x_train,w,y_train))
+sns.set()
+test_a= pd.DataFrame(test_accuracy, columms=learning_rates)
+train_a= pd.DataFrame(train_accuracy, columms=learning_rates)
+fig, ax = plt.subplots(figsize = (5, 4))
+sns.heatmap(train_a, annot=True, ax=ax, cmap="viridis")
+ax.set_title("Training Accuracy")
+ax.set_ylabel("$\eta$")
+ax.set_xlabel("$\lambda$")
+plt.show()
 #plt.imshow(data[10000-1].reshape(L,L))
 #plt.show()
