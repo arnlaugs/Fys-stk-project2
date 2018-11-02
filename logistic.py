@@ -5,7 +5,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 np.random.seed(14)
 import seaborn as sns
 import pandas as pd
-
+from functions import *
 
 
 def read_t(path,t):
@@ -93,33 +93,42 @@ x_train,y_train,x_test,y_test=train_test_split(x,y,train_size=0.8)
 print(x_train.shape, x_test.shape)
 
 
-learning_rates=[1e-4,1e-3,1-2,1e-1,1]
-#learning_rates=[0.01]
-itterations=[10,1e2,5e2,1e3]
+#learning_rates=[1e-4,1e-3,1e-2,1e-1]
+learning_rates=[0.01]
+#itterations=[10,1e2,5e2]
+itterations=[10,1e2]
 test_accuracy= np.zeros((len(itterations),len(learning_rates)))
 train_accuracy=  np.zeros((len(itterations),len(learning_rates)))
-i=0
-for j in range(len(itterations)-1):
+
+for j in range(len(itterations)):
+    i=0
     for lr in learning_rates:
 
         w=np.random.randn(x_train.shape[1],1)
         w=weigths_update(x_train,y_train,w,lr,itterations[j])
-        print(lr)
+        print(lr,j)
         #cost=loss(sigmoid(x,w),y)
         #print( cost)
         test_accuracy[j][i]=accurasy(x_test,w,y_test)
         train_accuracy[j][i]=accurasy(x_train,w,y_train)
-
+        print (test_accuracy[j][i],itterations[j],lr )
         i+=1
 
 sns.set()
-test_a= pd.DataFrame(test_accuracy, columms=learning_rates)
-train_a= pd.DataFrame(train_accuracy, columms=learning_rates)
-fig, ax = plt.subplots(figsize = (5, 4))
-sns.heatmap(train_a, annot=True, ax=ax, cmap="viridis")
-ax.set_title("Training Accuracy")
-ax.set_ylabel("$\eta$")
-ax.set_xlabel("$\lambda$")
+fig, ax = plt.subplots(figsize = (len(learning_rates),len(itterations)))
+sns.heatmap(test_accuracy, annot=True, ax=ax, cmap="viridis")
+ax.set_title("Test Accuracy")
+ax.set_ylabel("Itterations")
+ax.set_xlabel("Learning rate")
 plt.show()
+savefigure("logistic_accurasy_test_test", figure=fig)
+
+fig, ax = plt.subplots(figsize = (len(learning_rates),len(itterations)))
+sns.heatmap(train_accuracy, annot=True, ax=ax, cmap="viridis")
+ax.set_title("Training Accuracy")
+ax.set_ylabel("Itterations")
+ax.set_xlabel("Learning rate")
+plt.show()
+savefigure("logistic_accurasy_train_test",figure=fig)
 #plt.imshow(data[10000-1].reshape(L,L))
 #plt.show()
