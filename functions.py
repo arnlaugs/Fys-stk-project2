@@ -23,11 +23,10 @@ def K_fold(x,y,k,alpha,model):
 	R2_=0
 
 	for t in range(k):
-		print(x.shape, y.shape)
 		x_,y_,x_test,y_test=train_test_data(x,y,i[t*n_k:(t+1)*n_k])
 		#X= create_X(x_,y_,n=m)
 		#X_test= create_X(x_test,y_test,n=m)
-		print(x_.shape, y_.shape)
+
 		model.fit(x_,y_)
 
 
@@ -50,3 +49,19 @@ def train_test_data(x_,y_,i):
 
 
 	return x_learn,y_learn,x_test,y_test
+
+def savefigure(name, figure = "gcf"):
+	"""
+	Function for saving figures as a .tex-file for easier integration with latex.
+	"""
+	try:
+		from matplotlib2tikz import save as tikz_save
+		tikz_save(name.replace(" ", "_") + ".tex", figure = figure, figureheight='\\figureheight', figurewidth='\\figurewidth')
+	except ImportError:
+		print("Please install matplotlib2tikz to save figure as a .tex-file.")
+		import matplotlib.pyplot as plt
+		if figure == "gcf":
+			plt.savefig(name+".pdf")
+		else:
+			fig=figure
+			fig.savefig(name+".pdf")
