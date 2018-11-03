@@ -44,8 +44,8 @@ class NeuralNetwork:
     ):
 
         # Setting selv values
-        self.X_data_full = X_data
-        self.Y_data_full = Y_data
+        self.X_data_full = X_data; self.X_data = X_data
+        self.Y_data_full = Y_data; self.Y_data = Y_data
 
         self.n_inputs = X_data.shape[0]
         self.n_features = X_data.shape[1]
