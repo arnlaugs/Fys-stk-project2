@@ -1,7 +1,7 @@
 import warnings
 import numpy as np
 from sklearn.neural_network import MLPRegressor
-from my_NN import NeuralNetwork
+from NeuralNetwork import NeuralNetwork
 
 X = np.array([[0.0], [1.0]])
 y = np.array([0, 2])
