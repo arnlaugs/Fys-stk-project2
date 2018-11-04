@@ -86,6 +86,8 @@ class NeuralNetwork(NN):
 				train_accuracy[i][j] = r2_score(Y_train, train_pred)
 				test_accuracy[i][j] = r2_score(Y_test, test_pred)
 
+				print(train_accuracy[i][j])
+
 
 		fig, ax = plt.subplots(figsize = (10, 10))
 		sns.heatmap(train_accuracy, annot=True, ax=ax, cmap="viridis")
@@ -118,7 +120,7 @@ class NeuralNetwork(NN):
 
 if __name__ == "__main__":
 	# System size
-	L = 40				 # Number of spins
+	L = 50				 # Number of spins
 	N = 10000			 # Number of states
 
 
@@ -172,11 +174,13 @@ if __name__ == "__main__":
 	# print(r2_score(Y_test, model.predict(X_test)))
 	# print(r2_score(energies, model.predict(states)))
 
-	model = NeuralNetwork(X_train, Y_train, eta = 0.001, n_hidden_neurons = 100)
-	# model.train()
-	# print(r2_score(Y_train, model.predict(X_train)))
-	# print(r2_score(Y_test, model.predict(X_test)))
-	# print(r2_score(energies, model.predict(states)))	
+	model = NeuralNetwork(X_train, Y_train, batch_size = 1000, epochs = 50)
+	model.train()
+	print(r2_score(Y_train, model.predict(X_train)))
+	print(r2_score(Y_test, model.predict(X_test)))
+	print(r2_score(energies, model.predict(states)))
+
+
 
 	model.heatmap_neurons_eta(X_train, Y_train, X_test, Y_test)
 
