@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 import numpy as np
 import seaborn as sns
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import r2_score
+from sklearn.neural_network import MLPRegressor
 
 from NeuralNetwork import NeuralNetwork as NN
 
@@ -13,21 +14,40 @@ class NeuralNetwork(NN):
 		self,
 		X_data,
 		Y_data,
-		n_hidden_neurons=50,
+		n_hidden_neurons=100,
 		epochs=10,
 		batch_size=100,
 		eta=0.1,
 		lmbd=0.0,
-		activation_func = 'sigmoid',
-		activation_func_out = 'softmax',
-		cost_func = 'MSE'):
+		activation_func = 'relu',
+		activation_func_out = 'leaky_relu',
+		cost_func = 'MSE',
+		leaky_a = 0.01):
 
 		if len(Y_data.shape) == 1:
 			Y_data = np.expand_dims(Y_data, 1)
 
 		n_categories =  Y_data.shape[1]
+		self.leaky_a = leaky_a
+
 		NN.__init__(self, X_data, Y_data, n_hidden_neurons, n_categories, epochs, batch_size, eta, lmbd, activation_func, activation_func_out, cost_func)
 
+		if activation_func_out == 'leaky_relu':
+			self.f_out = self.leaky_ReLU
+			self.f_out_prime = self.leaky_ReLU_prime
+
+		if activation_func == 'leaky_relu':
+			self.f = self.leaky_ReLU
+			self.f_prime = self.leaky_ReLU_prime
+
+	def leaky_ReLU(self, z):
+		z[z<0] = self.leaky_a*z[z<0]
+		return z
+
+	def leaky_ReLU_prime(self, z):
+		z[z<0] = self.leaky_a
+		z[z>=0] = 1
+		return z
 
 	def predict(self, X):
 		"""
@@ -63,8 +83,8 @@ class NeuralNetwork(NN):
 				train_pred = DNN.predict(X_train)
 				test_pred = DNN.predict(X_test)
 
-				train_accuracy[i][j] = np.linalg.norm(Y_train - train_pred)/np.linalg.norm(Y_train)
-				test_accuracy[i][j] = np.linalg.norm(Y_test - test_pred)/np.linalg.norm(Y_test)
+				train_accuracy[i][j] = r2_score(Y_train, train_pred)
+				test_accuracy[i][j] = r2_score(Y_test, test_pred)
 
 
 		fig, ax = plt.subplots(figsize = (10, 10))
@@ -139,9 +159,24 @@ if __name__ == "__main__":
 	shape = states.shape
 	states = states.reshape((shape[0],shape[1]*shape[2]))
 
-	X_train, X_test, Y_train, Y_test = train_test_split(states, energies, train_size=0.8)
+	X_train, X_test, Y_train, Y_test = train_test_split(states, energies, train_size=0.8, test_size = 0.2)
 
-	model = NeuralNetwork(X_train, Y_train, cost_func = "MSE")
+	# model = MLPRegressor(solver			  = 'sgd',		# Stochastic gradient descent.
+ #						 activation		  = 'relu', 		# Skl name for relu.
+ #						 alpha			   = 0.0,			# No regularization for simplicity.
+ #						 hidden_layer_sizes  = (50) )		# Full network is of size (1,50,1).
+
+	# model.fit(X_train, Y_train)
+
+	# print(r2_score(Y_train, model.predict(X_train)))
+	# print(r2_score(Y_test, model.predict(X_test)))
+	# print(r2_score(energies, model.predict(states)))
+
+	model = NeuralNetwork(X_train, Y_train, eta = 0.001, n_hidden_neurons = 100)
+	# model.train()
+	# print(r2_score(Y_train, model.predict(X_train)))
+	# print(r2_score(Y_test, model.predict(X_test)))
+	# print(r2_score(energies, model.predict(states)))	
 
 	model.heatmap_neurons_eta(X_train, Y_train, X_test, Y_test)
 
