@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import numpy as np
 import seaborn as sns
+from matplotlib2tikz import save as tikz_save
 
 # Ensure the same random numbers appear every time
 np.random.seed(0)
@@ -68,6 +69,12 @@ class NeuralNetwork:
         if activation_func == 'tanh':
             self.f = self.tanh
             self.f_prime = self.tanh_prime
+        if activation_func == 'identity':
+            self.f = self.identity
+            self.f_prime = self.identity_prime
+        if activation_func == 'relu':
+            self.f = self.ReLU
+            self.f_prime = self.ReLU_prime
 
         # Setting up activation function for the output layer
         if activation_func_out == 'sigmoid':
@@ -78,7 +85,13 @@ class NeuralNetwork:
             self.f_out_prime = self.softmax_prime
         if activation_func_out == 'tanh':
             self.f_out = self.tanh
-            self.f_prime_out = self.tanh_prime
+            self.f_out_prime = self.tanh_prime
+        if activation_func_out == 'identity':
+            self.f_out = self.identity
+            self.f_out_prime = self.identity_prime
+        if activation_func_out == 'relu':
+            self.f_out = self.ReLU
+            self.f_out_prime = self.ReLU_prime
 
 
         # Setting up cost function
@@ -171,7 +184,7 @@ class NeuralNetwork:
                 self.backpropagation()
 
 
-    def heat_map(self):
+    def heatmap_eta_lambda(self):
         sns.set()
 
         eta_vals = np.logspace(-5, 1, 7)
@@ -209,6 +222,56 @@ class NeuralNetwork:
         ax.set_ylabel("$\eta$")
         ax.set_xlabel("$\lambda$")
         plt.show()
+
+
+    def heatmap_neurons_eta(self):
+        sns.set()
+
+        eta_vals = np.logspace(-6, -1, 6)
+        neuron_vals = [1,10,100,1000]
+
+
+        train_accuracy = np.zeros((len(neuron_vals),len(eta_vals)))
+        test_accuracy = np.zeros((len(neuron_vals),len(eta_vals)))
+
+        for i, neuron in enumerate(neuron_vals):
+            for j, eta in enumerate(eta_vals):
+                print("training DNN with %4d neurons and SGD eta=%0.6f." %(neuron,eta) )
+                DNN = NeuralNetwork(self.X_data_full, self.Y_data_full, eta=eta,
+                                    lmbd=0.0, epochs=self.epochs,
+                                    batch_size=self.batch_size,
+                                    n_hidden_neurons=neuron,
+                                    n_categories=self.n_categories)
+                DNN.train()
+
+                train_pred = DNN.predict(X_train)
+                test_pred = DNN.predict(X_test)
+
+                train_accuracy[i][j] = accuracy_score(Y_train, train_pred)
+                test_accuracy[i][j] = accuracy_score(Y_test, test_pred)
+
+
+        fig, ax = plt.subplots(figsize = (10, 10))
+        sns.heatmap(train_accuracy, annot=True, ax=ax, cmap="viridis")
+        ax.set_title("Training Accuracy")
+        ax.set_xlabel("$\eta$")
+        ax.set_ylabel("hidden neurons")
+        ax.set_xticklabels(eta_vals)
+        ax.set_yticklabels(neuron_vals)
+        tikz_save('heatmap_train.tex', figureheight="\\figureheight", figurewidth="\\figurewidth")
+        plt.show()
+
+        fig, ax = plt.subplots(figsize = (10, 10))
+        sns.heatmap(test_accuracy, annot=True, ax=ax, cmap="viridis")
+        ax.set_title("Test Accuracy")
+        ax.set_xlabel("$\eta$")
+        ax.set_ylabel("hidden neurons")
+        ax.set_xticklabels(eta_vals)
+        ax.set_yticklabels(neuron_vals)
+        tikz_save('heatmap_test.tex', figureheight="\\figureheight", figurewidth="\\figurewidth")
+        plt.show()
+
+
 
     def feed_forward_out(self, X):
         """
@@ -252,6 +315,22 @@ class NeuralNetwork:
     def tanh_prime(self, z):
         return 1 - tanh(z)**2
 
+    def identity(self, z):
+        return z
+
+    def identity_prime(self, z):
+        return 1
+
+    def ReLU(self, z):
+        #return z * (z > 0)
+        return np.maximum(z, 0)
+
+    def ReLU_prime(self, z):
+        z[z<=0] = 0
+        z[z>0] = 1
+        return z
+
+
     """ COST FUNCTIONS """
     def MSE_grad(self, a, y):
         return (a - y)
@@ -274,7 +353,7 @@ if __name__ == '__main__':
         """
 
         # Reading in and reshaping
-        folder = 'Fys-stk-project2/IsingData/'
+        folder = 'IsingData/'
         file_name = "Ising2DFM_reSample_L40_T=All.pkl"
         data = pickle.load(open(folder+file_name,'rb'))
         data = np.unpackbits(data).reshape(-1, 1600)
@@ -298,8 +377,10 @@ if __name__ == '__main__':
         del data,labels
 
         # Creating arrays, using only the 1000 first elements
-        X = np.concatenate((X_ordered[:1000],X_disordered[:1000]))
-        Y = np.concatenate((Y_ordered[:1000],Y_disordered[:1000]))
+        X = np.concatenate((X_ordered[:10000],X_disordered[:10000]))
+        Y = np.concatenate((Y_ordered[:10000],Y_disordered[:10000]))
+        print(len(X))
+
         return X, Y
 
 
@@ -323,8 +404,8 @@ if __name__ == '__main__':
 
 
     # Defining variables need in the Neural Network
-    epochs = 10
-    batch_size = 10
+    epochs = 100
+    batch_size = 100
     eta = 0.01
     lmbd = 0.01
     n_hidden_neurons = 10
@@ -333,4 +414,5 @@ if __name__ == '__main__':
     NN = NeuralNetwork(X_train, Y_train_onehot, eta=eta, lmbd=lmbd, epochs=epochs, batch_size=batch_size,
                         n_hidden_neurons=n_hidden_neurons, n_categories=n_categories)
 
-    NN.finding_nemo()
+    #NN.heatmap_eta_lambda()
+    NN.heatmap_neurons_eta()

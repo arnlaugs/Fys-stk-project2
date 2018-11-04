@@ -12,6 +12,8 @@ mlp = MLPRegressor( solver              = 'sgd',      # Stochastic gradient desc
 
 #mlp.out_activation_ = 'softmax'
 
+
+
 # Force sklearn to set up all the necessary matrices by fitting a data set.
 # We dont care if it converges or not, so lets ignore raised warnings.
 with warnings.catch_warnings():
@@ -42,7 +44,7 @@ coef_grads  = [np.empty((n_fan_in_, n_fan_out_))
 intercept_grads = [np.empty(n_fan_out_) for n_fan_out_ in layer_units[1:]]
 # ==========================================================================
 
-
+print(mlp.out_activation_)
 
 activations                       = mlp._forward_pass(activations)
 loss, coef_grads, intercept_grads = mlp._backprop(
@@ -53,7 +55,7 @@ nn = NeuralNetwork( X_data = X,
                     Y_data = target,
                     n_hidden_neurons = 3,
                     n_categories = 1,
-                    activation_func_out = 'sigmoid',
+                    activation_func_out = 'identity',
                     cost_func = 'MSE')
 
 # Copy the weights and biases from the scikit-learn network to your own.
@@ -66,7 +68,18 @@ nn.hidden_bias, nn.output_bias = mlp.intercepts_
 nn.feed_forward()
 nn.backpropagation()
 
-for i, a in enumerate([nn.a_h, nn.a_o]) :
+print('Output values from our NN:', [nn.X_data, nn.a_h, nn.a_o])
+print('Output values from scikit:', activations)
+print()
+
+print('Bias gradient from our NN:', [nn.hidden_bias_gradient, nn.output_bias_gradient])
+print('Bias gradient from scikit:', intercept_grads)
+print()
+
+print('Weight gradient from our NN:', [nn.hidden_weights_gradient, nn.output_weights_gradient])
+print('Weight gradient from scikit:', coef_grads)
+
+for i, a in enumerate([nn.X_data, nn.a_h, nn.a_o]) :
     assert np.allclose(a, activations[i])
 
 for i, derivative_bias in enumerate([nn.hidden_bias_gradient, nn.output_bias_gradient]) :
