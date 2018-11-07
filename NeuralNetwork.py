@@ -7,7 +7,7 @@ import seaborn as sns
 from matplotlib2tikz import save as tikz_save
 
 # Ensure the same random numbers appear every time
-np.random.seed(0)
+#np.random.seed(0)
 
 
 class NeuralNetwork:
@@ -109,10 +109,10 @@ class NeuralNetwork:
         Initialize the weights with random numbers from the standard
         normal distribution. Initialize biases to be arrays with 0.01.
         """
-        self.hidden_weights = np.random.randn(self.n_features, self.n_hidden_neurons)
+        self.hidden_weights = np.random.randn(self.n_features, self.n_hidden_neurons)*1e-3
         self.hidden_bias = np.zeros(self.n_hidden_neurons) + 0.01
 
-        self.output_weights = np.random.randn(self.n_hidden_neurons, self.n_categories)
+        self.output_weights = np.random.randn(self.n_hidden_neurons, self.n_categories)*1e-3
         self.output_bias = np.zeros(self.n_categories) + 0.01
 
 
@@ -127,9 +127,10 @@ class NeuralNetwork:
         """
         self.z_h = np.dot(self.X_data, self.hidden_weights) + self.hidden_bias
         self.a_h = self.f(self.z_h)
-
+        #print('Hidden: ',self.a_h)
         self.z_o = np.dot(self.a_h, self.output_weights) + self.output_bias
         self.a_o = self.f_out(self.z_o)
+        #print('Output:', self.a_o)
 
 
     def backpropagation(self):
@@ -141,6 +142,7 @@ class NeuralNetwork:
         4) If a regularization parameter is given, the weights are multiplied with
             this before calculating the output weights and biases.
         """
+        #error_output = self.a_o - self.Y_data
         error_output = self.C_grad(self.a_o, self.Y_data) * self.f_out_prime(self.z_o)
         error_hidden = np.dot(error_output, self.output_weights.T) * self.f_prime(self.z_h)
 
@@ -199,7 +201,8 @@ class NeuralNetwork:
                                     lmbd=lmbd, epochs=self.epochs,
                                     batch_size=self.batch_size,
                                     n_hidden_neurons=self.n_hidden_neurons,
-                                    n_categories=self.n_categories)
+                                    n_categories=self.n_categories,
+                                    activation_func='sigmoid')
                 DNN.train()
 
                 train_pred = DNN.predict(X_train)
@@ -227,9 +230,10 @@ class NeuralNetwork:
     def heatmap_neurons_eta(self):
         sns.set()
 
-        eta_vals = np.logspace(-6, -1, 6)
-        neuron_vals = [1,10,100,1000]
-
+        #eta_vals = np.logspace(-6, -1, 6)
+        #neuron_vals = [1,10,100,1000]
+        eta_vals = [1e-6, 1e-5, 1e-4, 0.001, 0.01, 0.1]
+        neuron_vals = [1, 10, 100, 1000]
 
         train_accuracy = np.zeros((len(neuron_vals),len(eta_vals)))
         test_accuracy = np.zeros((len(neuron_vals),len(eta_vals)))
@@ -241,7 +245,8 @@ class NeuralNetwork:
                                     lmbd=0.0, epochs=self.epochs,
                                     batch_size=self.batch_size,
                                     n_hidden_neurons=neuron,
-                                    n_categories=self.n_categories)
+                                    n_categories=self.n_categories,
+                                    activation_func='relu')
                 DNN.train()
 
                 train_pred = DNN.predict(X_train)
@@ -252,23 +257,23 @@ class NeuralNetwork:
 
 
         fig, ax = plt.subplots(figsize = (10, 10))
-        sns.heatmap(train_accuracy, annot=True, ax=ax, cmap="viridis")
+        sns.heatmap(train_accuracy, annot=True, ax=ax, cmap="viridis", vmin=0, vmax=1)
         ax.set_title("Training Accuracy")
         ax.set_xlabel("$\eta$")
         ax.set_ylabel("hidden neurons")
         ax.set_xticklabels(eta_vals)
         ax.set_yticklabels(neuron_vals)
-        tikz_save('heatmap_train.tex', figureheight="\\figureheight", figurewidth="\\figurewidth")
+        #tikz_save('heatmap_train.tex', figureheight="\\figureheight", figurewidth="\\figurewidth")
         plt.show()
 
         fig, ax = plt.subplots(figsize = (10, 10))
-        sns.heatmap(test_accuracy, annot=True, ax=ax, cmap="viridis")
+        sns.heatmap(test_accuracy, annot=True, ax=ax, cmap="viridis", vmin=0, vmax=1)
         ax.set_title("Test Accuracy")
         ax.set_xlabel("$\eta$")
         ax.set_ylabel("hidden neurons")
         ax.set_xticklabels(eta_vals)
         ax.set_yticklabels(neuron_vals)
-        tikz_save('heatmap_test.tex', figureheight="\\figureheight", figurewidth="\\figurewidth")
+        #tikz_save('heatmap_test.tex', figureheight="\\figureheight", figurewidth="\\figurewidth")
         plt.show()
 
 
@@ -313,7 +318,7 @@ class NeuralNetwork:
         return np.tanh(z)
 
     def tanh_prime(self, z):
-        return 1 - tanh(z)**2
+        return 1 - self.tanh(z)**2
 
     def identity(self, z):
         return z
@@ -336,7 +341,7 @@ class NeuralNetwork:
         return (a - y)
 
     def cross_entropy_grad(self, a, y):
-        return (a - y)/(a*(1.0 - a))
+        return np.nan_to_num((a - y)/(a*(1.0 - a)))
 
 
 if __name__ == '__main__':
@@ -377,8 +382,8 @@ if __name__ == '__main__':
         del data,labels
 
         # Creating arrays, using only the 1000 first elements
-        X = np.concatenate((X_ordered[:10000],X_disordered[:10000]))
-        Y = np.concatenate((Y_ordered[:10000],Y_disordered[:10000]))
+        X = np.concatenate((X_ordered[:500],X_disordered[:500]))
+        Y = np.concatenate((Y_ordered[:500],Y_disordered[:500]))
         print(len(X))
 
         return X, Y
@@ -404,8 +409,8 @@ if __name__ == '__main__':
 
 
     # Defining variables need in the Neural Network
-    epochs = 100
-    batch_size = 100
+    epochs = 10
+    batch_size = 10
     eta = 0.01
     lmbd = 0.01
     n_hidden_neurons = 10
