@@ -116,7 +116,7 @@ for j in range(len(itterations)):
 
 sns.set()
 fig, ax = plt.subplots(figsize = (len(learning_rates),len(itterations)))
-sns.heatmap(test_accuracy, annot=True, ax=ax, cmap="viridis")
+sns.heatmap(test_accuracy, annot=True, ax=ax, cmap="viridis", vmin=0, vmax=1)
 ax.set_title("Test Accuracy")
 ax.set_ylabel("Itterations")
 ax.set_xlabel("Learning rate")
@@ -124,7 +124,7 @@ plt.show()
 savefigure("logistic_accurasy_test_test", figure=fig)
 
 fig, ax = plt.subplots(figsize = (len(learning_rates),len(itterations)))
-sns.heatmap(train_accuracy, annot=True, ax=ax, cmap="viridis")
+sns.heatmap(train_accuracy, annot=True, ax=ax, cmap="viridis", vmin=0, vmax=1)
 ax.set_title("Training Accuracy")
 ax.set_ylabel("Itterations")
 ax.set_xlabel("Learning rate")
