@@ -6,6 +6,7 @@ np.random.seed(14)
 import seaborn as sns
 import pandas as pd
 from functions import *
+from sklearn import linear_model
 
 
 def read_t(path,t):
@@ -26,18 +27,18 @@ def custom_loss(y, y_predicted):
     return -(y*np.log(y_predicted) - (1-y)*np.log(1-y_predicted)**2).mean()
 
 def weigths_update(x,y,w,lr,itterations):
-    N=len(x)
+    N=x.shape[0]
+    print(N)
     for k in range(int(itterations)):
         predictions=sigmoid(x,w)
 
         p=predictions-y
         #print(predictions.shape, y.shape, x.shape,p.shape)
-        w=w-1/N*lr*np.dot(x.T,p)
-        #if k%50==0:
-            #cost=loss(sigmoid(x,w),y)
-            #print( cost,accurasy(x,w,y),k, lr)
-        #    print(k)
+        gradient=1/N*np.dot(x.T,p)
+        w=w-lr*gradient
+        if k%100==0:
 
+            print(np.mean(gradient),k,lr)
     return w
 
 def accurasy(x,w,y):
@@ -50,7 +51,8 @@ def accurasy(x,w,y):
             t=0
         if t==y[i]:
             a+=1
-    return a/len(x)
+
+    return a/x.shape[0]
 def train_test_split(X,Y,train_size=0.8):
     """ Takes in X and Y values and split them random in to test and learn"""
     print(X.shape)
@@ -84,19 +86,21 @@ for t in temp_list:
         i+=4
     else:
         i+=1
-itterations=300
+
 y=y.reshape(-1,1)
-#x=x[:30000,:]
-#y=y[:30000]
+
 
 x_train,y_train,x_test,y_test=train_test_split(x,y,train_size=0.8)
-print(x_train.shape, x_test.shape)
 
+logreg=linear_model.LogisticRegression()
+logreg.fit(x_train, y_train)
 
-#learning_rates=[1e-4,1e-3,1e-2,1e-1]
-learning_rates=[0.01]
-#itterations=[10,1e2,5e2]
-itterations=[10,1e2]
+print(logreg.score(x_train,y_train))
+print(logreg.score(x_test,y_test))
+
+learning_rates=[1e-4,1e-3,1e-2,1e-1]
+#learning_rates=[0.01]
+itterations=[10,1e2,5e2]
 test_accuracy= np.zeros((len(itterations),len(learning_rates)))
 train_accuracy=  np.zeros((len(itterations),len(learning_rates)))
 
@@ -116,19 +120,19 @@ for j in range(len(itterations)):
 
 sns.set()
 fig, ax = plt.subplots(figsize = (len(learning_rates),len(itterations)))
-sns.heatmap(test_accuracy, annot=True, ax=ax, cmap="viridis")
+sns.heatmap(test_accuracy, annot=True, ax=ax, cmap="viridis",vmin=0, vmax=1)
 ax.set_title("Test Accuracy")
 ax.set_ylabel("Itterations")
 ax.set_xlabel("Learning rate")
 plt.show()
-savefigure("logistic_accurasy_test_test", figure=fig)
+#savefigure("logistic_accurasy_test_test", figure=fig)
 
 fig, ax = plt.subplots(figsize = (len(learning_rates),len(itterations)))
-sns.heatmap(train_accuracy, annot=True, ax=ax, cmap="viridis")
+sns.heatmap(train_accuracy, annot=True, ax=ax, cmap="viridis",vmin=0, vmax=1)
 ax.set_title("Training Accuracy")
 ax.set_ylabel("Itterations")
 ax.set_xlabel("Learning rate")
 plt.show()
-savefigure("logistic_accurasy_train_test",figure=fig)
+#savefigure("logistic_accurasy_train_test",figure=fig)
 #plt.imshow(data[10000-1].reshape(L,L))
 #plt.show()
