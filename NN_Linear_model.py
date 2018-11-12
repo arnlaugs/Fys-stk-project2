@@ -110,16 +110,6 @@ if __name__ == "__main__":
         # Calculating the energies E for each state
         E = np.einsum('...i,ij,...j->...',states,J,states)
 
-        """
-        #The Einstein sum does the same as the following nested
-        #for-loops, but is much more efficient.
-        E = np.zeros(N)
-
-        for i in range(N):
-            for j in range(L):
-                for k in range(L):
-                    E[i] += J[j,k]*states[i][j]*states[i][k]
-        """
         return E
 
 
@@ -133,16 +123,6 @@ if __name__ == "__main__":
 
     X_train, X_test, Y_train, Y_test = train_test_split(states, energies, train_size=0.8, test_size = 0.2)
 
-    # model = MLPRegressor(solver             = 'sgd',      # Stochastic gradient descent.
- #                       activation       = 'relu',         # Skl name for relu.
- #                       alpha             = 0.0,           # No regularization for simplicity.
- #                       hidden_layer_sizes  = (50) )       # Full network is of size (1,50,1).
-
-    # model.fit(X_train, Y_train)
-
-    # print(r2_score(Y_train, model.predict(X_train)))
-    # print(r2_score(Y_test, model.predict(X_test)))
-    # print(r2_score(energies, model.predict(states)))
 
     model = NeuralNetwork(X_train, Y_train, batch_size = 10, epochs = 50, n_hidden_neurons=10, eta=0.00001)
     model.train()
