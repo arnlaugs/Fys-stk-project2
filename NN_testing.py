@@ -6,11 +6,9 @@ from NeuralNetwork import NeuralNetwork
 X = np.array([[0.0], [1.0]])
 y = np.array([0, 2])
 mlp = MLPRegressor( solver              = 'sgd',      # Stochastic gradient descent.
-                    activation          = 'logistic', # Skl name for sigmoid.
+                    activation          = 'relu',     # Skl name for sigmoid.
                     alpha               = 0.0,        # No regularization for simplicity.
                     hidden_layer_sizes  = (3) )    # Full network is of size (1,3,1).
-
-#mlp.out_activation_ = 'softmax'
 
 
 
@@ -56,6 +54,7 @@ nn = NeuralNetwork( X_data = X,
                     n_hidden_neurons = 3,
                     n_categories = 1,
                     activation_func_out = 'identity',
+                    activation_func = 'relu',
                     cost_func = 'MSE')
 
 # Copy the weights and biases from the scikit-learn network to your own.
