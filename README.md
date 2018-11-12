@@ -49,6 +49,7 @@ Can also provide heatmaps illustating which values of the learning rate, regular
    
    
 **NN_Linear_model.py**:
+
  Modifies the class from NeuralNetwork.py to work for a linear, non-classification case.
  Input variables
 * X_data: dataset, features
