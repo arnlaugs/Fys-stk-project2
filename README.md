@@ -40,7 +40,7 @@ Used by calling:
     NN.train() 
     NN.predict(X_test)
 
-Can also provide heatmaps illustating which values of the learning rate, regularization parameter, and the number of hidden neurons that gives the best accuracies:
+Can also provide heatmaps illustrating which values of the learning rate, regularization parameter, and the number of hidden neurons that gives the best accuracies:
 
     NN = NeuralNetwork(X_train, Y_train, ... )
 
@@ -71,7 +71,7 @@ Used by calling:
     NN.train() 
     NN.predict(X_test)
 
-Can also provide heatmaps illustating which values of the learning rate and the number of hidden neurons that gives the best accuracies:
+Can also provide heatmaps illustrating which values of the learning rate and the number of hidden neurons that gives the best accuracies:
 
     NN = NeuralNetwork(X_train, Y_train, ... )
 
