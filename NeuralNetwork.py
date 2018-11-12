@@ -41,10 +41,13 @@ class NeuralNetwork:
         lmbd=0.0,
         activation_func = 'sigmoid',
         activation_func_out = 'softmax',
-        cost_func = 'cross_entropy'
+        cost_func = 'cross_entropy',
+        leaky_a = 0.01
     ):
 
-        # Setting selv values
+        self.leaky_a = leaky_a   
+
+        # Setting self values
         self.X_data_full = X_data; self.X_data = X_data
         self.Y_data_full = Y_data; self.Y_data = Y_data
 
@@ -75,6 +78,10 @@ class NeuralNetwork:
         if activation_func == 'relu':
             self.f = self.ReLU
             self.f_prime = self.ReLU_prime
+        if activation_func == 'leaky_relu':
+            self.f = self.leaky_ReLU
+            self.f_prime = self.leaky_ReLU_prime
+
 
         # Setting up activation function for the output layer
         if activation_func_out == 'sigmoid':
@@ -92,6 +99,9 @@ class NeuralNetwork:
         if activation_func_out == 'relu':
             self.f_out = self.ReLU
             self.f_out_prime = self.ReLU_prime
+        if activation_func_out == 'leaky_relu':
+            self.f_out = self.leaky_ReLU
+            self.f_out_prime = self.leaky_ReLU_prime
 
 
         # Setting up cost function
@@ -333,6 +343,15 @@ class NeuralNetwork:
     def ReLU_prime(self, z):
         z[z<=0] = 0
         z[z>0] = 1
+        return z
+
+    def leaky_ReLU(self, z):
+        z[z<0] = self.leaky_a*z[z<0]
+        return z
+
+    def leaky_ReLU_prime(self, z):
+        z[z<0] = self.leaky_a
+        z[z>=0] = 1
         return z
 
 

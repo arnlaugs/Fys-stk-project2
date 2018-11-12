@@ -174,7 +174,7 @@ if __name__ == "__main__":
     # print(r2_score(Y_test, model.predict(X_test)))
     # print(r2_score(energies, model.predict(states)))
 
-    model = NeuralNetwork(X_train, Y_train, batch_size = 1000, epochs = 50, n_hidden_neurons=10, eta=0.00001)
+    model = NeuralNetwork(X_train, Y_train, batch_size = 10, epochs = 50, n_hidden_neurons=10, eta=0.00001)
     model.train()
     print(r2_score(Y_train, model.predict(X_train)))
     print(r2_score(Y_test, model.predict(X_test)))
