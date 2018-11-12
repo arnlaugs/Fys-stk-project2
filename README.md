@@ -11,7 +11,8 @@ The projects found in this repository is a results of the collaboration between
 
 * **Markus Leira Asprusten** - (https://github.com/maraspr)
 
-
+## Downloding data:
+To run thees programs you need to downlode dataset from Mehta et.al. Found here: https://physics.bu.edu/~pankajm/ML-Review-Datasets/isingMC/
 
 ## Description of programs
 
@@ -76,3 +77,22 @@ Can also provide heatmaps illustrating which values of the learning rate and the
     NN = NeuralNetwork(X_train, Y_train, ... )
 
     NN.heatmap_neurons_eta()
+    
+**regression.py**:
+A class for linear regression using OLS, Ridge or Lasso. 
+Used by calling:
+
+            model=OLS() (or Lasso() or Ridge())
+            model.fit(x,y)
+            y_predicted=model.predict(x)
+
+
+
+**linear_regression.py**:
+
+Uses Lasso, Ridge and OLS regression to find the coupling constant J. It tests for different  λ values. It plot the MSE, R2 score. And J for different spinns.
+
+**logistic_regression.py**:
+
+Uses data from Mehta et.al. and clasifies if it is ordered or disorded spin configurations. It plots a heatmap of how accurate it is for different learning rates and number of iterations. 
+
