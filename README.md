@@ -32,6 +32,7 @@ Input variables:
 * activation_func: activation function, sigmoid is standard
 * activation_func_out: activation function for output
 * cost_func: Cost function
+* leaky_a: Slope for negative values in Leaky ReLU
 
 Used by calling:
 
@@ -44,4 +45,33 @@ Can also provide heatmaps illustating which values of the learning rate, regular
     NN = NeuralNetwork(X_train, Y_train, ... )
 
     NN.heatmap_eta_lambda()
+    NN.heatmap_neurons_eta()
+   
+   
+**NN_Linear_model.py**:
+ Modifies the class from NeuralNetwork.py to work for a linear, non-classification case.
+ Input variables
+* X_data: dataset, features
+* Y_data: classes
+* n_hidden_neurons: number neurons in the hidden layer
+* epochs: number of times running trough training data
+* batch_size: number of datapoint in each batch for calculating
+            gradient for gradient descent
+* eta: learning rate
+* lmbd: regularization parameter
+* activation_func: activation function, sigmoid is standard
+* activation_func_out: activation function for output
+* cost_func: Cost function
+* leaky_a: Slope for negative values in Leaky ReLU
+
+Used by calling:
+
+    NN = NeuralNetwork(X_train, Y_train, ... )
+    NN.train() 
+    NN.predict(X_test)
+
+Can also provide heatmaps illustating which values of the learning rate and the number of hidden neurons that gives the best accuracies:
+
+    NN = NeuralNetwork(X_train, Y_train, ... )
+
     NN.heatmap_neurons_eta()
