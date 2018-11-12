@@ -16,6 +16,7 @@ The projects found in this repository is a results of the collaboration between
 ## Description of programs
 
 * ** NeuralNetwork.py **: 
+
 Simple neural network for classification. 
     Input variables:
         - X_data: dataset, features
