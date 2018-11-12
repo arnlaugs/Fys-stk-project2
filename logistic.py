@@ -6,41 +6,41 @@ np.random.seed(14)
 import seaborn as sns
 import pandas as pd
 from functions import *
+from sklearn import linear_model
 
 
 def read_t(path,t):
+    """Reads data of one temperature """
     data = pickle.load(open(path+'Ising2DFM_reSample_L40_T=%.2f.pkl'%t,'rb'))
 
 
     return np.unpackbits(data).astype(int).reshape(-1,1600)
     #return data
 def sigmoid(x,w):
+    """Calculate the sigmoid for x with weigths. """
     t=np.dot(x,w)
 
     return 1/(1+np.exp(-t))
 def loss(h, y):
+    """Loss function, take in predicted values h and accurate values y """
+    return (-y * np.log(h) - (1 - y) * np.log(1 - h)).mean()
 
-    return (-y * np.log(h) - (1 - y) * np.log(1 - h+1e-12)).mean()
 
-def custom_loss(y, y_predicted):
-    return -(y*np.log(y_predicted) - (1-y)*np.log(1-y_predicted)**2).mean()
 
 def weigths_update(x,y,w,lr,itterations):
-    N=len(x)
+    """ Calculate the weights from x,y and a input weight, set a learning rate and give number of iterations"""
+    N=x.shape[0]
+
     for k in range(int(itterations)):
         predictions=sigmoid(x,w)
 
         p=predictions-y
-        #print(predictions.shape, y.shape, x.shape,p.shape)
-        w=w-1/N*lr*np.dot(x.T,p)
-        #if k%50==0:
-            #cost=loss(sigmoid(x,w),y)
-            #print( cost,accurasy(x,w,y),k, lr)
-        #    print(k)
+        w=w-lr*1/N*np.dot(x.T,p)
 
     return w
 
 def accurasy(x,w,y):
+    """Calculate the accuracy from the data x,y and the weights w """
     a=0
     #print(len(x),x[0].shape)
     for i in range(len(x)):
@@ -50,7 +50,8 @@ def accurasy(x,w,y):
             t=0
         if t==y[i]:
             a+=1
-    return a/len(x)
+
+    return a/x.shape[0]
 def train_test_split(X,Y,train_size=0.8):
     """ Takes in X and Y values and split them random in to test and learn"""
     print(X.shape)
@@ -74,6 +75,7 @@ temp_list=[0.25,0.50,0.75,1.00,1.25,1.50,1.75,2.75,3.00,3.25,3.50,3.75,4.00]
 i=0
 
 for t in temp_list:
+    """Takes the data from spesified temperatures. """
     if t== 0.25:
         x=read_t(path,t)
         y=labels[:10000]
@@ -84,19 +86,22 @@ for t in temp_list:
         i+=4
     else:
         i+=1
-itterations=300
+
 y=y.reshape(-1,1)
-#x=x[:30000,:]
-#y=y[:30000]
 
+#Splitt in test and train
 x_train,y_train,x_test,y_test=train_test_split(x,y,train_size=0.8)
-print(x_train.shape, x_test.shape)
 
+#Compear with sklearn
+logreg=linear_model.LogisticRegression()
+logreg.fit(x_train, y_train)
 
-#learning_rates=[1e-4,1e-3,1e-2,1e-1]
-learning_rates=[0.01]
-#itterations=[10,1e2,5e2]
-itterations=[10,1e2]
+print(logreg.score(x_train,y_train))
+print(logreg.score(x_test,y_test))
+
+#Test for different learning rates and number of iterations
+learning_rates=[1e-4,1e-3,1e-2,1e-1]
+itterations=[10,1e2,5e2]
 test_accuracy= np.zeros((len(itterations),len(learning_rates)))
 train_accuracy=  np.zeros((len(itterations),len(learning_rates)))
 
@@ -107,8 +112,6 @@ for j in range(len(itterations)):
         w=np.random.randn(x_train.shape[1],1)
         w=weigths_update(x_train,y_train,w,lr,itterations[j])
         print(lr,j)
-        #cost=loss(sigmoid(x,w),y)
-        #print( cost)
         test_accuracy[j][i]=accurasy(x_test,w,y_test)
         train_accuracy[j][i]=accurasy(x_train,w,y_train)
         print (test_accuracy[j][i],itterations[j],lr )
@@ -130,5 +133,3 @@ ax.set_ylabel("Itterations")
 ax.set_xlabel("Learning rate")
 plt.show()
 savefigure("logistic_accurasy_train_test",figure=fig)
-#plt.imshow(data[10000-1].reshape(L,L))
-#plt.show()
