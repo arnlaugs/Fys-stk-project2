@@ -17,7 +17,7 @@ The projects found in this repository is a results of the collaboration between
 
 **NeuralNetwork.py**: 
 
-Simple neural network for classification. 
+Simple neural network for classification with one hidden layer. 
 Input variables:
 * X_data: dataset, features
 * Y_data: classes
@@ -38,3 +38,10 @@ Used by calling:
     NN = NeuralNetwork(X_train, Y_train, ... )
     NN.train() 
     NN.predict(X_test)
+
+Can also provide heatmaps illustating which values of the learning rate, regularization parameter, and the number of hidden neurons that gives the best accuracies:
+
+    NN = NeuralNetwork(X_train, Y_train, ... )
+
+    NN.heatmap_eta_lambda()
+    NN.heatmap_neurons_eta()
