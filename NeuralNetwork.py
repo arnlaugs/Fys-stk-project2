@@ -25,6 +25,7 @@ class NeuralNetwork:
         - activation_func: activation function, sigmoid is standard
         - activation_func_out: activation function for output
         - cost_func: Cost function
+        - leaky_a: Slope for negative values in Leaky ReLU
     """
     def __init__(
         self,

@@ -28,26 +28,10 @@ class NeuralNetwork(NN):
             Y_data = np.expand_dims(Y_data, 1)
 
         n_categories =  Y_data.shape[1]
-        self.leaky_a = leaky_a
 
         NN.__init__(self, X_data, Y_data, n_hidden_neurons, n_categories, epochs, batch_size, eta, lmbd, activation_func, activation_func_out, cost_func)
 
-        if activation_func_out == 'leaky_relu':
-            self.f_out = self.leaky_ReLU
-            self.f_out_prime = self.leaky_ReLU_prime
 
-        if activation_func == 'leaky_relu':
-            self.f = self.leaky_ReLU
-            self.f_prime = self.leaky_ReLU_prime
-
-    def leaky_ReLU(self, z):
-        z[z<0] = self.leaky_a*z[z<0]
-        return z
-
-    def leaky_ReLU_prime(self, z):
-        z[z<0] = self.leaky_a
-        z[z>=0] = 1
-        return z
 
     def predict(self, X):
         """
@@ -101,20 +85,6 @@ class NeuralNetwork(NN):
         ax.set_ylabel("$\eta$")
         ax.set_xlabel("$\lambda$")
         plt.show()
-
-    # def create_biases_and_weights(self):
-    #   NN.create_biases_and_weights(self)
-
-    #   print(self.hidden_weights.shape)
-    #   print(self.hidden_bias.shape)
-    #   print(self.output_weights.shape)
-    #   print(self.output_bias.shape)
-
-    # def feed_forward(self):
-    #   NN.feed_forward(self)
-    #   print(self.a_o.shape)
-    #   print(self.Y_data.shape)
-    #   exit()
 
 
 
